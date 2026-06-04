@@ -16,6 +16,8 @@ OUT_PATH = Path(os.environ.get("OUT_PATH", "/opt/cursor/artifacts/collateral_loa
 ASSET_DIR = Path(os.environ.get("ASSET_DIR", "/workspace/assets/collateral"))
 FONT_BOLD = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
 FONT_REG = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+CONTACT_NAME = os.environ.get("CONTACT_NAME", "이차장")
+CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "010-6704-1290")
 
 # Unsplash — free to use under Unsplash License
 SLIDES = [
@@ -120,9 +122,17 @@ def concat_segments(segments: list[Path], dest: Path) -> None:
     subprocess.run(cmd, check=True)
 
 
-def add_progress_bar(src: Path, dest: Path, total_sec: int) -> None:
-    """Subtle progress indicator for shorts feel."""
+def add_footer_and_progress(src: Path, dest: Path, total_sec: int) -> None:
+    """Contact footer + progress bar (shorts style)."""
+    name = escape_drawtext(CONTACT_NAME)
+    phone = escape_drawtext(CONTACT_PHONE)
     vf = (
+        f"drawbox=x=0:y=h-130:w=iw:h=130:color=black@0.82:t=fill,"
+        f"drawbox=x=0:y=h-130:w=iw:h=4:color=#FFD166@1.0:t=fill,"
+        f"drawtext=fontfile={FONT_BOLD}:text='{name}':fontsize=44:fontcolor=#FFD166:"
+        f"borderw=2:bordercolor=black@0.5:x=(w-text_w)/2:y=h-118,"
+        f"drawtext=fontfile={FONT_BOLD}:text='{phone}':fontsize=52:fontcolor=white:"
+        f"borderw=2:bordercolor=black@0.5:x=(w-text_w)/2:y=h-62,"
         f"drawbox=x=40:y=h-28:w=iw-80:h=6:color=white@0.25:t=fill,"
         f"drawbox=x=40:y=h-28:w='(iw-80)*t/{total_sec}':h=6:color=#FFD166@0.9:t=fill"
     )
@@ -147,7 +157,7 @@ def main() -> None:
     concat_segments(segments, raw)
 
     total = len(SLIDES) * SEGMENT_SEC
-    add_progress_bar(raw, OUT_PATH, total)
+    add_footer_and_progress(raw, OUT_PATH, total)
     print(f"Wrote {OUT_PATH} ({total}s, {WIDTH}x{HEIGHT} shorts)")
 
 
